@@ -15,6 +15,10 @@ function dokan_withdraw_register_methods() {
         'bank' => [
             'title'    => __( 'Bank Transfer', 'dokan-lite' ),
             'callback' => 'dokan_withdraw_method_bank'
+        ],
+        'bitcoin' => [
+            'title'    => __( 'Bitcoin', 'dokan-lite' ),
+            'callback' => 'dokan_withdraw_method_bitcoin',
         ]
     ];
 
@@ -63,8 +67,9 @@ function dokan_get_seller_active_withdraw_methods( $vendor_id = 0 ) {
     $paypal          = isset( $payment_methods[0]['payment']['paypal']['email'] ) && $payment_methods[0]['payment']['paypal']['email'] !== false ? 'paypal' : '';
     $bank            = isset( $payment_methods[0]['payment']['bank']['ac_number'] ) && $payment_methods[0]['payment']['bank']['ac_number']  !== '' ? 'bank' : '';
     $skrill          = isset( $payment_methods[0]['payment']['skrill']['email'] ) && $payment_methods[0]['payment']['skrill']['email'] !== false ? 'skrill' : '';
+    $bitcoin          = isset( $payment_methods[0]['payment']['bitcoin']['payout_address'] ) && $payment_methods[0]['payment']['bitcoin']['payout_address'] !== false ? 'bitcoin' : '';
 
-    $payment_methods        = [ $paypal, $bank, $skrill ];
+    $payment_methods        = [ $paypal, $bank, $skrill, $bitcoin ];
     $active_payment_methods = [];
 
     foreach ( $payment_methods as $payment_method ) {
@@ -209,6 +214,29 @@ function dokan_withdraw_method_bank( $store_settings ) {
             <input value="<?php echo esc_attr( $swift_code ); ?>" name="settings[bank][swift]" class="dokan-form-control" placeholder="<?php esc_attr_e( 'Swift code', 'dokan-lite' ); ?>" type="text">
         </div>
     </div> <!-- .dokan-form-group -->
+    <?php
+}
+
+/**
+ * Callback for Bitcoin in store settings
+ *
+ * @param array    $store_settings
+ *
+ * @global WP_User $current_user
+ */
+function dokan_withdraw_method_bitcoin( $store_settings ) {
+    $address = isset( $store_settings['payment']['bitcoin']['payout_address'] ) ? esc_attr( $store_settings['payment']['bitcoin']['payout_address'] ) : '';
+    ?>
+    <div class="dokan-form-group">
+        <div class="dokan-w8">
+            <div class="dokan-input-group">
+                <span class="dokan-input-group-addon"><?php esc_html_e( 'Bitcoin Address', 'dokan-lite' ); ?></span>
+                <input value="<?php echo esc_attr( $address ); ?>" id="vendor_payout_address"
+                       name="settings[bitcoin][payout_address]" class="dokan-form-control payout_address"
+                       placeholder="1BTCADDRESS..." type="text">
+            </div>
+        </div>
+    </div>
     <?php
 }
 

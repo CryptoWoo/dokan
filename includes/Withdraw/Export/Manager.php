@@ -34,4 +34,16 @@ class Manager {
         $csv = new CSV( $this->withdraws );
         $csv->export();
     }
+
+    /**
+     * Export data in CSV
+     *
+     * @since 3.0.0
+     *
+     * @return void
+     */
+    public function electrum_csv() {
+        $csv = new CSV( $this->withdraws );
+        $csv->export_electrum();
+    }
 }

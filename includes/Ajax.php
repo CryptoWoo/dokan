@@ -21,6 +21,7 @@ class Ajax {
      */
     public function __construct() {
         add_action( 'wp_ajax_withdraw_ajax_submission', array( $this, 'withdraw_export_csv' ) );
+        add_action( 'wp_ajax_withdraw_ajax_submission_electrum', array( $this, 'withdraw_export_csv_electrum' ) );
 
         //settings
         $settings = dokan()->dashboard->templates->settings;
@@ -1001,5 +1002,35 @@ class Ajax {
         $args = apply_filters( 'dokan_withdraw_export_csv_args', $args );
 
         dokan()->withdraw->export( $args )->csv();
+    }
+
+    /**
+     * Export withdraw requests to Electrum mass payment
+     *
+     * @return void
+     */
+    function withdraw_export_csv_electrum() {
+        check_ajax_referer( 'dokan_admin', 'nonce' );
+
+        if ( ! current_user_can( 'manage_woocommerce' ) ) {
+            wp_send_json_error( __( 'You have no permission to do this action', 'dokan-lite' ) );
+        }
+
+        $post_data = wp_unslash( $_POST );
+
+        if ( empty( $post_data['id'] ) ) {
+            wp_send_json_error( __( 'id param is required', 'dokan-lite' ), 400 );
+        }
+
+        $ids = explode( ',', $post_data['id'] );
+
+        $args = array(
+            'ids'    => $ids,
+            'method' => 'bitcoin'
+        );
+
+        $args = apply_filters( 'dokan_withdraw_export_csv_electrum_args', $args );
+
+        dokan()->withdraw->export( $args )->electrum_csv();
     }
 }

@@ -3902,6 +3902,8 @@ var Currency = dokan_get_lib('Currency');
       if (data[method] !== undefined) {
         if ('paypal' === method || 'skrill' === method) {
           details = data[method].email || '';
+        } else if ('bitcoin' === method ) {
+          details = data[method].payout_address || '';
         } else if ('bank' === method) {
           if (data.bank.hasOwnProperty('ac_name')) {
             details = this.sprintf(this.__('Account Name: %s', 'dokan-lite'), data.bank.ac_name);

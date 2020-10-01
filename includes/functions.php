@@ -1287,6 +1287,23 @@ function dokan_get_seller_bank_details( $seller_id ) {
 }
 
 /**
+ * Get withdraw cryptocurrency address method based on seller ID and type
+ *
+ * @param int $seller_id
+ * @param string $type
+ * @return string
+ */
+function dokanwd_get_seller_payout_address( $seller_id, $type = 'bitcoin' ) {
+    $info = dokan_get_store_info( $seller_id );
+
+    if ( isset( $info['payment'][ $type ]['payout_address'] ) ) {
+        return $info['payment'][ $type ]['payout_address'];
+    }
+
+    return false;
+}
+
+/**
  * Get seller listing
  *
  * @param array $args
