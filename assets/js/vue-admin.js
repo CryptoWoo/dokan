@@ -3706,6 +3706,7 @@ var Currency = dokan_get_lib('Currency');
       },
       notFound: this.__('No requests found.', 'dokan-lite'),
       massPayment: this.__('Paypal Mass Payment File is Generated.', 'dokan-lite'),
+      massPaymentElectrum: this.__('Electrum Mass Payment File is Generated.', 'dokan-lite'),
       showCb: true,
       loading: false,
       columns: {
@@ -3789,6 +3790,9 @@ var Currency = dokan_get_lib('Currency');
         }, {
           key: 'paypal',
           label: this.__('Download PayPal mass payment file', 'dokan-lite')
+        },{
+            key: 'electrum_mass_payment',
+            label: this.__('Download Electrum mass payment file', 'dokan-lite')
         }];
       } else if ('cancelled' == this.currentStatus) {
         return [{
@@ -3898,6 +3902,8 @@ var Currency = dokan_get_lib('Currency');
       if (data[method] !== undefined) {
         if ('paypal' === method || 'skrill' === method) {
           details = data[method].email || '';
+        } else if ('bitcoin' === method ) {
+            details = data[method].payout_address || '';
         } else if ('bank' === method) {
           if (data.bank.hasOwnProperty('ac_name')) {
             details = this.sprintf(this.__('Account Name: %s', 'dokan-lite'), data.bank.ac_name);
@@ -3948,14 +3954,24 @@ var Currency = dokan_get_lib('Currency');
         });
       }
 
-      if ('paypal' === action) {
+      if ('paypal' === action || 'electrum_mass_payment' === action) {
         var ids = items.join(",");
-        jQuery.post(ajaxurl, {
-          'dokan_withdraw_bulk': 'paypal',
-          'id': ids,
-          'action': 'withdraw_ajax_submission',
-          'nonce': dokan.nonce
-        }, function (response, status, xhr) {
+        var req_data = {
+            'dokan_withdraw_bulk': 'paypal',
+            'id': ids,
+            'action': 'withdraw_ajax_submission',
+            'nonce': dokan.nonce
+        };
+        if ('electrum_mass_payment' === action) {
+            req_data = {
+                'dokan_withdraw_bulk': 'electrum_mass_payment',
+                'id': ids,
+                'action': 'withdraw_ajax_submission_electrum',
+                'nonce': dokan.nonce
+            };
+        }
+
+        jQuery.post(ajaxurl, req_data, function (response, status, xhr) {
           if ('html/csv' === xhr.getResponseHeader('Content-type')) {
             var filename = "";
             var disposition = xhr.getResponseHeader('Content-Disposition');
@@ -4004,9 +4020,13 @@ var Currency = dokan_get_lib('Currency');
               }, 100); // cleanup
             }
           }
-
           if (response) {
-            alert(self.massPayment);
+            if ('electrum_mass_payment' === action) {
+                alert(self.massPaymentElectrum);
+                dbwd_add_txid_field(ids);
+            } else {
+                alert(self.massPayment);
+            }
             return;
           }
         });
